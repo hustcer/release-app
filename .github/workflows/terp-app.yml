@@ -14,6 +14,10 @@ on:
       - release/app
   workflow_dispatch:
     inputs:
+      version:
+        required: true
+        default: 'v1.0.0'
+        description: 'Version'
       android:
         type: boolean
         default: false
@@ -43,16 +47,18 @@ jobs:
         let token = "${{ secrets.ERDA_GIT_TOKEN }}"
         let branch = "${{ vars.TERP_REPO_BRANCH }}"
         let repo = $"https://git:($token)@${{ vars.TERP_REPO_URL }}"
-        git clone --depth=1 --branch=$branch $repo
+        git clone --depth=1 --branch $branch $repo
         print (pwd)
         cd terp-app; ls | print
+        $'BUILD_REF=(git rev-parse --short HEAD)(char nl)' o>> $env.GITHUB_ENV
+        $'BUILD_DATE=(date now | format date %Y-%m-%dT%H:%M:%SZ)(char nl)' o>> $env.GITHUB_ENV
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '20'
     - name: Install dependencies
       run: |
-        pwd | print
+        cd terp-app; pwd | print
         npm install --ignore-scripts
         cd ios && pod install
     - name: Show Env Info
@@ -119,6 +125,7 @@ jobs:
           | xcbeautify --renderer github-actions
 
         echo "Show exported IPA..."
+        mv build/ipa/TrantorApp.ipa build/ipa/terp-app.ipa
         ls -la build/ipa/
 
     - name: Publish Archive
@@ -126,14 +133,16 @@ jobs:
       if: ${{ startsWith(github.ref, 'refs/tags/') }}
       with:
         draft: true
-        files: './ios/build/ipa/TrantorApp.ipa'
+        name: "${{ github.event.inputs.version }}"
+        files: './ios/build/ipa/terp-app.ipa'
+        body: "Build from commit ${{ env.BUILD_REF }} at ${{ env.BUILD_DATE }}"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-android:
     name: Build Android App
     runs-on: ubuntu-latest
-    if: github.event.inputs.android == true || startsWith(github.ref, 'refs/tags/')
+    # if: github.event.inputs.android == true || startsWith(github.ref, 'refs/tags/')
     # container: mingc/android-build-box:latest
     container: reactnativecommunity/react-native-android
     steps:
@@ -144,9 +153,11 @@ jobs:
         let token = "${{ secrets.ERDA_GIT_TOKEN }}"
         let branch = "${{ vars.TERP_REPO_BRANCH }}"
         let repo = $"https://git:($token)@${{ vars.TERP_REPO_URL }}"
-        git clone --depth=1 --branch=$branch $repo
+        git clone --depth=1 --branch $branch $repo
         print (pwd)
         cd terp-app; ls | print
+        $'BUILD_REF=(git rev-parse --short HEAD)(char nl)' o>> $env.GITHUB_ENV
+        $'BUILD_DATE=(date now | format date %Y-%m-%dT%H:%M:%SZ)(char nl)' o>> $env.GITHUB_ENV
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
@@ -154,17 +165,21 @@ jobs:
     - name: Show Env Info
       run: npx envinfo
     - name: Build Android App
-      # Ignore install lefthook hooks by adding --ignore-scripts flag
+      shell: nu {0}
       run: |
-        pwd | print
+        cd terp-app; pwd | print
         npm install --ignore-scripts
-        cd android && chmod +x gradlew
+        cd android; chmod +x gradlew
         ./gradlew assembleRelease
+        print 'Build Android App Success:'
+        mv app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/terp-app.apk
+        ls -la app/build/outputs/apk/release/terp-app.apk
     - name: Publish Archive
       uses: softprops/action-gh-release@v2.1.0
-      if: ${{ startsWith(github.ref, 'refs/tags/') }}
       with:
         draft: true
-        files: './android/app/build/outputs/apk/release/app-release.apk'
+        name: "${{ github.event.inputs.version }}"
+        files: './terp-app/android/app/build/outputs/apk/release/terp-app.apk'
+        body: "Build from commit ${{ env.BUILD_REF }} at ${{ env.BUILD_DATE }}"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
