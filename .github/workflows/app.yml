@@ -1,0 +1,144 @@
+# Description:
+#   - A github workflow for building and uploading the apk and ipa
+# REF:
+#   1. https://reactnative.dev/docs/publishing-to-app-store
+#   2. https://docs.expo.dev/distribution/app-stores/
+
+name: Build Native Apps
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+    branches:
+      - release/latest
+  workflow_dispatch:
+    inputs:
+      android:
+        type: boolean
+        default: false
+        required: false
+        description: 'Build Android'
+
+# Fix Resource not accessible by integration 403 error
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  build-ios:
+    name: Build iOS App
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+    - name: Install dependencies
+      run: |
+        npm install --ignore-scripts
+        cd ios && pod install
+    - name: Show Env Info
+      run: npx envinfo
+
+    - name: Install iOS certificates and provisioning profile
+      env:
+        KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        P12_PASSWORD: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE_PASSWORD }}
+        BUILD_CERTIFICATE_BASE64: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE_BASE64 }}
+        BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.IOS_AD_HOC_PROVISIONING_PROFILE_BASE64 }}
+      run: |
+        # Create temp files
+        CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+        PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
+        KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+
+        # Import certificate and provisioning profile
+        echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
+        echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode -o $PP_PATH
+
+        # Create temporary keychain
+        security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+        security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+        security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+
+        # Import certificate to temporary keychain
+        security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+        security list-keychain -d user -s $KEYCHAIN_PATH
+
+        # Install provisioning profile to temporary keychain
+        mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+        cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles/build_pp.mobileprovision
+
+    - name: Build iOS App
+      run: |
+        cd ios
+        # Disable automatic signing and device check
+        defaults write com.apple.dt.Xcode IDESkipMacroValidation -bool YES
+
+        set -o pipefail && xcodebuild -workspace *.xcworkspace -scheme "TrantorApp" \
+          -configuration Release \
+          DEVELOPMENT_TEAM="QNWSSM6MTS" \
+          PROVISIONING_PROFILE_SPECIFIER="terp-adhoc" \
+          PRODUCT_BUNDLE_IDENTIFIER="io.terminus.terp.app" \
+          -archivePath build/app.xcarchive \
+          archive \
+          CODE_SIGN_STYLE="Manual" \
+          CODE_SIGN_IDENTITY="iPhone Distribution" \
+          ENABLE_BITCODE=NO \
+          ONLY_ACTIVE_ARCH=NO \
+          -destination 'generic/platform=iOS' \
+          -allowProvisioningUpdates \
+          | xcbeautify --renderer github-actions
+
+        # Export IPA
+        # "ad-hoc" is deprecated at Xcode 15.4. Use "release-testing" instead.
+        echo "Start exporting IPA..."
+        set -o pipefail && xcodebuild -exportArchive \
+          -archivePath build/app.xcarchive \
+          -exportPath build/ipa \
+          -exportOptionsPlist TrantorApp/ExportOptions.plist \
+          -allowProvisioningUpdates \
+          | xcbeautify --renderer github-actions
+
+        echo "Show exported IPA..."
+        ls -la build/ipa/
+
+    - name: Publish Archive
+      uses: softprops/action-gh-release@v2.1.0
+      if: ${{ startsWith(github.ref, 'refs/tags/') }}
+      with:
+        draft: true
+        files: './ios/build/ipa/TrantorApp.ipa'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-android:
+    name: Build Android App
+    runs-on: ubuntu-latest
+    if: github.event.inputs.android == true || startsWith(github.ref, 'refs/tags/')
+    # container: mingc/android-build-box:latest
+    container: reactnativecommunity/react-native-android
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+    - name: Show Env Info
+      run: npx envinfo
+    - name: Build Android App
+      # Ignore install lefthook hooks by adding --ignore-scripts flag
+      run: |
+        npm install --ignore-scripts
+        cd android && chmod +x gradlew
+        ./gradlew assembleRelease
+    - name: Publish Archive
+      uses: softprops/action-gh-release@v2.1.0
+      if: ${{ startsWith(github.ref, 'refs/tags/') }}
+      with:
+        draft: true
+        files: './android/app/build/outputs/apk/release/app-release.apk'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
