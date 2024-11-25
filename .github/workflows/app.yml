@@ -8,10 +8,10 @@ name: Build Native Apps
 
 on:
   push:
-    tags:
-      - 'v*.*.*'
-    branches:
-      - release/latest
+    # tags:
+    #   - 'v*.*.*'
+    # branches:
+    #   - release/latest
   workflow_dispatch:
     inputs:
       android:
