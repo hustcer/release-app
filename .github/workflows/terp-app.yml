@@ -129,6 +129,17 @@ jobs:
         mv build/ipa/TrantorApp.ipa build/ipa/terp-app.ipa
         ls -la build/ipa/
 
+    - name: Upload IPA to OSS
+      uses: JohnGuan/oss-upload-action@main
+      with:
+        region: oss-cn-hangzhou
+        bucket: terminus-new-trantor
+        key-id: ${{ secrets.OSS_AK }}
+        key-secret: ${{ secrets.OSS_SK }}
+        endpoint: https://oss-cn-hangzhou.aliyuncs.com
+        assets: |
+          terp-app/ios/build/ipa/terp-app.ipa:/fe-resources/app-pod/terp-app.ipa
+
     - name: Publish Archive
       uses: softprops/action-gh-release@v2.1.0
       # if: ${{ startsWith(github.ref, 'refs/tags/') }}
@@ -175,6 +186,18 @@ jobs:
         print 'Build Android App Success:'
         mv app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/terp-app.apk
         ls -la app/build/outputs/apk/release/terp-app.apk
+
+    - name: Upload APK to OSS
+      uses: JohnGuan/oss-upload-action@main
+      with:
+        region: oss-cn-hangzhou
+        bucket: terminus-new-trantor
+        key-id: ${{ secrets.OSS_AK }}
+        key-secret: ${{ secrets.OSS_SK }}
+        endpoint: https://oss-cn-hangzhou.aliyuncs.com
+        assets: |
+          terp-app/android/app/build/outputs/apk/release/terp-app.apk:/fe-resources/app-pod/terp-app.apk
+
     - name: Publish Archive
       uses: softprops/action-gh-release@v2.1.0
       with:
