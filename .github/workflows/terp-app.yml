@@ -10,8 +10,8 @@ on:
   push:
     tags:
       - 'terp*.*.*'
-    branches:
-      - release/app
+    # branches:
+    #   - release/app
   workflow_dispatch:
     inputs:
       android:
@@ -24,15 +24,15 @@ on:
         default: false
         required: false
         description: 'Build iOS'
-      gh-version:
-        required: true
-        default: 'v1.1.0'
-        description: 'Github Version'
       publish-to-gh:
         type: boolean
         default: false
         required: false
         description: 'Publish to GitHub'
+      gh-version:
+        required: true
+        default: 'v1.1.0'
+        description: 'Github Version'
 
 # Fix Resource not accessible by integration 403 error
 permissions:
@@ -130,10 +130,15 @@ jobs:
           -allowProvisioningUpdates \
           | xcbeautify --renderer github-actions
 
+    - name: Show IPA Info
+      shell: nu {0}
+      run: |
+        cd terp-app/ios
         echo "Show exported IPA..."
-        ls **/*.ipa
+        ls **/*.ipa | table -w 200 | print
         mv build/ipa/TrantorApp.ipa build/ipa/terp-app.ipa
-        ls -la build/ipa/
+        print 'Rename IPA files:'
+        ls -la build/ipa/*.ipa | table -w 200 | print
 
     - name: Upload IPA to OSS
       uses: JohnGuan/oss-upload-action@main
@@ -189,10 +194,11 @@ jobs:
         cd android; chmod +x gradlew
         ./gradlew assembleRelease
         print 'Build Android App Success:'
-        ls **/*.apk
+        ls **/*.apk | table -w 200 | print
         mv app/build/outputs/apk/release/app-arm64-v8a-release.apk app/build/outputs/apk/release/terp-app-arm64.apk
         mv app/build/outputs/apk/release/app-armeabi-v7a-release.apk app/build/outputs/apk/release/terp-app-armv7a.apk
-        ls -la app/build/outputs/apk/release/*.apk
+        print 'Rename APK files:'
+        ls -la app/build/outputs/apk/release/*.apk | table -w 200 | print
 
     - name: Upload APK to OSS
       uses: JohnGuan/oss-upload-action@main
