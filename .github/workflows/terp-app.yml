@@ -131,6 +131,7 @@ jobs:
           | xcbeautify --renderer github-actions
 
         echo "Show exported IPA..."
+        ls **/*.ipa
         mv build/ipa/TrantorApp.ipa build/ipa/terp-app.ipa
         ls -la build/ipa/
 
@@ -188,8 +189,10 @@ jobs:
         cd android; chmod +x gradlew
         ./gradlew assembleRelease
         print 'Build Android App Success:'
-        mv app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/terp-app.apk
-        ls -la app/build/outputs/apk/release/terp-app.apk
+        ls **/*.apk
+        mv app/build/outputs/apk/release/app-arm64-v8a-release.apk app/build/outputs/apk/release/terp-app-arm64.apk
+        mv app/build/outputs/apk/release/app-armeabi-v7a-release.apk app/build/outputs/apk/release/terp-app-armv7a.apk
+        ls -la app/build/outputs/apk/release/*.apk
 
     - name: Upload APK to OSS
       uses: JohnGuan/oss-upload-action@main
@@ -200,7 +203,8 @@ jobs:
         key-secret: ${{ secrets.OSS_SK }}
         endpoint: https://oss-cn-hangzhou.aliyuncs.com
         assets: |
-          terp-app/android/app/build/outputs/apk/release/terp-app.apk:/fe-resources/app-pod/terp-app.apk
+          terp-app/android/app/build/outputs/apk/release/terp-app-arm64.apk:/fe-resources/app-pod/terp-app-arm64.apk
+          terp-app/android/app/build/outputs/apk/release/terp-app-armv7a.apk:/fe-resources/app-pod/terp-app-armv7a.apk
 
     - name: Publish Archive
       uses: softprops/action-gh-release@v2.1.0
@@ -208,7 +212,9 @@ jobs:
       with:
         draft: true
         name: "${{ github.event.inputs.gh-version }}"
-        files: './terp-app/android/app/build/outputs/apk/release/terp-app.apk'
+        files: |
+          ./terp-app/android/app/build/outputs/apk/release/terp-app-arm64.apk
+          ./terp-app/android/app/build/outputs/apk/release/terp-app-armv7a.apk
         body: "Build from commit ${{ env.BUILD_REF }} at ${{ env.BUILD_DATE }}"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
