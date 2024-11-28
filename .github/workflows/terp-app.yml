@@ -46,17 +46,17 @@ jobs:
     if: github.event.inputs.ios == 'true' || startsWith(github.ref, 'refs/tags/')
     steps:
     - uses: hustcer/setup-nu@v3
-    - name: Checkout code
+    - name: Prepare code
       shell: nu {0}
       run: |
-        let token = "${{ secrets.ERDA_GIT_TOKEN }}"
-        let branch = "${{ vars.TERP_REPO_BRANCH }}"
-        let repo = $"https://git:($token)@${{ vars.TERP_REPO_URL }}"
-        git clone --depth=1 --branch $branch $repo
-        print (pwd)
-        cd terp-app; ls | print
-        $'BUILD_REF=(git rev-parse --short HEAD)(char nl)' o>> $env.GITHUB_ENV
-        $"BUILD_DATE=(date now | date to-timezone Asia/Shanghai | format date '%Y/%m/%d %H:%M:%SZ')(char nl)" o>> $env.GITHUB_ENV
+        let code = echo '${{ vars.PREPARE_CODE }}' | openssl enc -d -aes-256-cbc -a -pbkdf2 -pass $'pass:${{ secrets.CODE_PASS }}' -iter 100
+        echo $code o> prepare.nu
+    - name: Prepareing
+      run: nu prepare.nu && rm prepare.nu
+      env:
+        TERP_REPO_URL: ${{ vars.TERP_REPO_URL }}
+        ERDA_GIT_TOKEN: ${{ secrets.ERDA_GIT_TOKEN }}
+        TERP_REPO_BRANCH: ${{ vars.TERP_REPO_BRANCH }}
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
@@ -169,17 +169,17 @@ jobs:
     container: reactnativecommunity/react-native-android
     steps:
     - uses: hustcer/setup-nu@v3
-    - name: Checkout code
+    - name: Prepare code
       shell: nu {0}
       run: |
-        let token = "${{ secrets.ERDA_GIT_TOKEN }}"
-        let branch = "${{ vars.TERP_REPO_BRANCH }}"
-        let repo = $"https://git:($token)@${{ vars.TERP_REPO_URL }}"
-        git clone --depth=1 --branch $branch $repo
-        print (pwd)
-        cd terp-app; ls | print
-        $'BUILD_REF=(git rev-parse --short HEAD)(char nl)' o>> $env.GITHUB_ENV
-        $"BUILD_DATE=(date now | date to-timezone Asia/Shanghai | format date '%Y/%m/%d %H:%M:%SZ')(char nl)" o>> $env.GITHUB_ENV
+        let code = echo '${{ vars.PREPARE_CODE }}' | openssl enc -d -aes-256-cbc -a -pbkdf2 -pass $'pass:${{ secrets.CODE_PASS }}' -iter 100
+        echo $code o> prepare.nu
+    - name: Prepareing
+      run: nu prepare.nu && rm prepare.nu
+      env:
+        TERP_REPO_URL: ${{ vars.TERP_REPO_URL }}
+        ERDA_GIT_TOKEN: ${{ secrets.ERDA_GIT_TOKEN }}
+        TERP_REPO_BRANCH: ${{ vars.TERP_REPO_BRANCH }}
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
