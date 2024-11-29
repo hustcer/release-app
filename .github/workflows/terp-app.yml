@@ -14,6 +14,14 @@ on:
     #   - release/app
   workflow_dispatch:
     inputs:
+      build-branch:
+        type: choice
+        required: true
+        defalut: 'develop'
+        description: 'Build Branch'
+        options:
+          - develop
+          - master
       android:
         type: boolean
         default: false
@@ -56,7 +64,7 @@ jobs:
       env:
         TERP_REPO_URL: ${{ vars.TERP_REPO_URL }}
         ERDA_GIT_TOKEN: ${{ secrets.ERDA_GIT_TOKEN }}
-        TERP_REPO_BRANCH: ${{ vars.TERP_REPO_BRANCH }}
+        TERP_REPO_BRANCH: ${{ github.event.inputs.build-branch }}
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
@@ -179,7 +187,7 @@ jobs:
       env:
         TERP_REPO_URL: ${{ vars.TERP_REPO_URL }}
         ERDA_GIT_TOKEN: ${{ secrets.ERDA_GIT_TOKEN }}
-        TERP_REPO_BRANCH: ${{ vars.TERP_REPO_BRANCH }}
+        TERP_REPO_BRANCH: ${{ github.event.inputs.build-branch }}
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
