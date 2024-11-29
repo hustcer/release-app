@@ -204,8 +204,7 @@ jobs:
         ./gradlew assembleRelease
         print 'Build Android App Success:'
         ls **/*.apk | table -w 200 | print
-        mv app/build/outputs/apk/release/app-arm64-v8a-release.apk app/build/outputs/apk/release/terp-app-arm64.apk
-        mv app/build/outputs/apk/release/app-armeabi-v7a-release.apk app/build/outputs/apk/release/terp-app-armv7a.apk
+        mv app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/terp-app.apk
         print 'Rename APK files:'
         ls -la app/build/outputs/apk/release/*.apk | table -w 200 | print
 
@@ -218,8 +217,7 @@ jobs:
         key-secret: ${{ secrets.OSS_SK }}
         endpoint: https://oss-cn-hangzhou.aliyuncs.com
         assets: |
-          terp-app/android/app/build/outputs/apk/release/terp-app-arm64.apk:/fe-resources/app-pod/terp-app-arm64.apk
-          terp-app/android/app/build/outputs/apk/release/terp-app-armv7a.apk:/fe-resources/app-pod/terp-app-armv7a.apk
+          terp-app/android/app/build/outputs/apk/release/terp-app.apk:/fe-resources/app-pod/terp-app.apk
 
     - name: Publish Archive
       uses: softprops/action-gh-release@v2.1.0
@@ -228,8 +226,7 @@ jobs:
         draft: true
         name: "${{ github.event.inputs.gh-version }}"
         files: |
-          ./terp-app/android/app/build/outputs/apk/release/terp-app-arm64.apk
-          ./terp-app/android/app/build/outputs/apk/release/terp-app-armv7a.apk
+          ./terp-app/android/app/build/outputs/apk/release/terp-app.apk
         body: "Build from commit ${{ env.BUILD_REF }} at ${{ env.BUILD_DATE }}"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
