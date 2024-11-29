@@ -17,7 +17,7 @@ on:
       build-branch:
         type: choice
         required: true
-        defalut: 'develop'
+        default: 'develop'
         description: 'Build Branch'
         options:
           - develop
@@ -157,7 +157,7 @@ jobs:
         key-secret: ${{ secrets.OSS_SK }}
         endpoint: https://oss-cn-hangzhou.aliyuncs.com
         assets: |
-          terp-app/ios/build/ipa/terp-app.ipa:/fe-resources/app-pod/terp-app.ipa
+          terp-app/ios/build/ipa/terp-app.ipa:/fe-resources/app-pod/terp-app.${{ github.event.inputs.build-branch }}.ipa
 
     - name: Publish Archive
       uses: softprops/action-gh-release@v2.1.0
@@ -217,8 +217,8 @@ jobs:
         key-secret: ${{ secrets.OSS_SK }}
         endpoint: https://oss-cn-hangzhou.aliyuncs.com
         assets: |
-          terp-app/android/app/build/outputs/apk/release/terp-app-arm64.apk:/fe-resources/app-pod/terp-app-arm64.apk
-          terp-app/android/app/build/outputs/apk/release/terp-app-armv7a.apk:/fe-resources/app-pod/terp-app-armv7a.apk
+          terp-app/android/app/build/outputs/apk/release/terp-app-arm64.apk:/fe-resources/app-pod/terp-app-arm64.${{ github.event.inputs.build-branch }}.apk
+          terp-app/android/app/build/outputs/apk/release/terp-app-armv7a.apk:/fe-resources/app-pod/terp-app-armv7a.${{ github.event.inputs.build-branch }}.apk
 
     - name: Publish Archive
       uses: softprops/action-gh-release@v2.1.0
