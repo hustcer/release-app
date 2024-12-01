@@ -22,6 +22,7 @@ on:
         options:
           - develop
           - master
+          - support/cts
       android:
         type: boolean
         default: false
@@ -148,16 +149,20 @@ jobs:
         print 'Rename IPA files:'
         ls -la build/ipa/*.ipa | table -w 200 | print
 
-    - name: Upload IPA to OSS
-      uses: JohnGuan/oss-upload-action@main
+    - name: Setup OSS Util
+      uses: yizhoumo/setup-ossutil@v2
       with:
-        region: oss-cn-hangzhou
-        bucket: terminus-new-trantor
-        key-id: ${{ secrets.OSS_AK }}
-        key-secret: ${{ secrets.OSS_SK }}
+        access-key-id: ${{ secrets.OSS_AK }}
+        access-key-secret: ${{ secrets.OSS_SK }}
         endpoint: https://oss-cn-hangzhou.aliyuncs.com
-        assets: |
-          terp-app/ios/build/ipa/terp-app.ipa:/fe-resources/app-pod/terp-app.${{ github.event.inputs.build-branch }}.ipa
+
+    - name: Upload IPA to OSS
+      shell: nu {0}
+      run: |
+        let APP_SUFFIX = ${{ vars.APP_SUFFIX }}
+        let srcBranch = '${{ github.event.inputs.build-branch }}'
+        let suffix = $APP_SUFFIX | get $srcBranch | default 'None'
+        ossutil cp terp-app/ios/build/ipa/terp-app.ipa oss://terminus-new-trantor/fe-resources/app-pod/terp-app.($suffix).ipa --check-md5
 
     - name: Publish Archive
       uses: softprops/action-gh-release@v2.1.0
@@ -208,17 +213,23 @@ jobs:
         print 'Rename APK files:'
         ls -la app/build/outputs/apk/release/*.apk | table -w 200 | print
 
-    - name: Upload APK to OSS
-      uses: JohnGuan/oss-upload-action@main
-      with:
-        region: oss-cn-hangzhou
-        bucket: terminus-new-trantor
-        key-id: ${{ secrets.OSS_AK }}
-        key-secret: ${{ secrets.OSS_SK }}
-        endpoint: https://oss-cn-hangzhou.aliyuncs.com
-        assets: |
-          terp-app/android/app/build/outputs/apk/release/terp-app-arm64.apk:/fe-resources/app-pod/terp-app-arm64.${{ github.event.inputs.build-branch }}.apk
-          terp-app/android/app/build/outputs/apk/release/terp-app-armv7a.apk:/fe-resources/app-pod/terp-app-armv7a.${{ github.event.inputs.build-branch }}.apk
+      - name: Setup OSS Util
+        uses: yizhoumo/setup-ossutil@v2
+        with:
+          access-key-id: ${{ secrets.OSS_AK }}
+          access-key-secret: ${{ secrets.OSS_SK }}
+          endpoint: https://oss-cn-hangzhou.aliyuncs.com
+
+      - name: Upload APK to OSS
+        shell: nu {0}
+        run: |
+          let APP_SUFFIX = ${{ vars.APP_SUFFIX }}
+          let srcBranch = '${{ github.event.inputs.build-branch }}'
+          let suffix = $APP_SUFFIX | get $srcBranch | default 'None'
+          const releaseDir = 'android/app/build/outputs/apk/release'
+          const storePath = 'terminus-new-trantor/fe-resources/app-pod'
+          ossutil cp terp-app/($releaseDir)/terp-app-arm64.apk oss://($storePath)/terp-app-arm64.($suffix).apk --check-md5
+          ossutil cp terp-app/($releaseDir)/terp-app-armv7a.apk oss://($storePath)/terp-app-armv7a.($suffix).apk --check-md5
 
     - name: Publish Archive
       uses: softprops/action-gh-release@v2.1.0
