@@ -70,14 +70,15 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '20'
+    - name: Show Env Info
+      run: npx envinfo
+
     - name: Install dependencies
       shell: nu {0}
       run: |
         cd terp-app; pwd | print
         npm install --ignore-scripts
         cd ios; pod install
-    - name: Show Env Info
-      run: npx envinfo
 
     - name: Install iOS certificates and provisioning profile
       env:
@@ -162,7 +163,8 @@ jobs:
         let APP_SUFFIX = ${{ vars.APP_SUFFIX }}
         let srcBranch = '${{ github.event.inputs.build-branch }}'
         let suffix = $APP_SUFFIX | get $srcBranch | default 'None'
-        ossutil cp terp-app/ios/build/ipa/terp-app.ipa oss://terminus-new-trantor/fe-resources/app-pod/terp-app.($suffix).ipa --check-md5
+        let dest = $'oss://terminus-new-trantor/fe-resources/app-pod/terp-app.($suffix).ipa'
+        ossutil cp terp-app/ios/build/ipa/terp-app.ipa $dest --check-md5
 
     - name: Publish Archive
       uses: softprops/action-gh-release@v2.1.0
@@ -199,6 +201,7 @@ jobs:
         node-version: '20'
     - name: Show Env Info
       run: npx envinfo
+
     - name: Build Android App
       shell: nu {0}
       run: |
@@ -226,10 +229,10 @@ jobs:
           let APP_SUFFIX = ${{ vars.APP_SUFFIX }}
           let srcBranch = '${{ github.event.inputs.build-branch }}'
           let suffix = $APP_SUFFIX | get $srcBranch | default 'None'
-          const releaseDir = 'android/app/build/outputs/apk/release'
-          const storePath = 'terminus-new-trantor/fe-resources/app-pod'
-          ossutil cp terp-app/($releaseDir)/terp-app-arm64.apk oss://($storePath)/terp-app-arm64.($suffix).apk --check-md5
-          ossutil cp terp-app/($releaseDir)/terp-app-armv7a.apk oss://($storePath)/terp-app-armv7a.($suffix).apk --check-md5
+          const releaseDir = 'terp-app/android/app/build/outputs/apk/release'
+          const storePath = 'oss://terminus-new-trantor/fe-resources/app-pod'
+          ossutil cp $'($releaseDir)/terp-app-arm64.apk' $'($storePath)/terp-app-arm64.($suffix).apk' --check-md5
+          ossutil cp $'($releaseDir)/terp-app-armv7a.apk' $'($storePath)/terp-app-armv7a.($suffix).apk' --check-md5
 
     - name: Publish Archive
       uses: softprops/action-gh-release@v2.1.0
