@@ -164,7 +164,7 @@ jobs:
         let srcBranch = '${{ github.event.inputs.build-branch }}'
         let suffix = $APP_SUFFIX | get $srcBranch | default 'None'
         let dest = $'oss://terminus-new-trantor/fe-resources/app-pod/terp-app.($suffix).ipa'
-        ossutil cp terp-app/ios/build/ipa/terp-app.ipa $dest
+        ossutil cp --force terp-app/ios/build/ipa/terp-app.ipa $dest
 
     - name: Publish Archive
       uses: softprops/action-gh-release@v2.1.0
@@ -231,8 +231,8 @@ jobs:
         let suffix = $APP_SUFFIX | get $srcBranch | default 'None'
         const releaseDir = 'terp-app/android/app/build/outputs/apk/release'
         const storePath = 'oss://terminus-new-trantor/fe-resources/app-pod'
-        ossutil cp $'($releaseDir)/terp-app-arm64.apk' $'($storePath)/terp-app-arm64.($suffix).apk'
-        ossutil cp $'($releaseDir)/terp-app-armv7a.apk' $'($storePath)/terp-app-armv7a.($suffix).apk'
+        ossutil cp --force $'($releaseDir)/terp-app-arm64.apk' $'($storePath)/terp-app-arm64.($suffix).apk'
+        ossutil cp --force $'($releaseDir)/terp-app-armv7a.apk' $'($storePath)/terp-app-armv7a.($suffix).apk'
 
     - name: Publish Archive
       uses: softprops/action-gh-release@v2.1.0
