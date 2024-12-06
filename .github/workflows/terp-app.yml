@@ -163,7 +163,7 @@ jobs:
       run: |
         let APP_SUFFIX = ${{ vars.APP_SUFFIX }}
         let srcBranch = '${{ github.event.inputs.build-branch }}'
-        let suffix = $APP_SUFFIX | get $srcBranch | default 'None'
+        let suffix = $APP_SUFFIX | get -i $srcBranch | default 'None'
         let dest = $'oss://terminus-new-trantor/fe-resources/app-pod/terp-app.($suffix).ipa'
         ossutil cp --force terp-app/ios/build/ipa/terp-app.ipa $dest
 
@@ -229,7 +229,7 @@ jobs:
       run: |
         let APP_SUFFIX = ${{ vars.APP_SUFFIX }}
         let srcBranch = '${{ github.event.inputs.build-branch }}'
-        let suffix = $APP_SUFFIX | get $srcBranch | default 'None'
+        let suffix = $APP_SUFFIX | get -i $srcBranch | default 'None'
         const releaseDir = 'terp-app/android/app/build/outputs/apk/release'
         const storePath = 'oss://terminus-new-trantor/fe-resources/app-pod'
         ossutil cp --force $'($releaseDir)/terp-app-arm64.apk' $'($storePath)/terp-app-arm64.($suffix).apk'
