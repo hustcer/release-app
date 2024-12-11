@@ -3,6 +3,7 @@
 # REF:
 #   1. https://reactnative.dev/docs/publishing-to-app-store
 #   2. https://docs.expo.dev/distribution/app-stores/
+#   3. https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/workflow-commands-for-github-actions#grouping-log-lines
 
 name: Build TERP Apps
 
@@ -217,7 +218,9 @@ jobs:
         cd terp-app; pwd | print
         npm install --ignore-scripts
         cd android; chmod +x gradlew
+        print '::group::Gradle assembleRelease'
         ./gradlew assembleRelease
+        print '::endgroup::'
         print 'Build Android App Success:'
         ls **/*.apk | table -w 200 | print
         mv app/build/outputs/apk/release/app-arm64-v8a-release.apk app/build/outputs/apk/release/terp-app-arm64.apk
