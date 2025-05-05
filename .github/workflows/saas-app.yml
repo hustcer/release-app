@@ -116,7 +116,7 @@ jobs:
         # Disable automatic signing and device check
         defaults write com.apple.dt.Xcode IDESkipMacroValidation -bool YES
 
-        set -o pipefail && xcodebuild -workspace *.xcworkspace -scheme "TrantorApp" \
+        set -o pipefail && xcodebuild -workspace *.xcworkspace -scheme "SaasMobile" \
           -configuration Release \
           DEVELOPMENT_TEAM="QNWSSM6MTS" \
           PROVISIONING_PROFILE_SPECIFIER="terp-adhoc" \
@@ -137,7 +137,7 @@ jobs:
         set -o pipefail && xcodebuild -exportArchive \
           -archivePath build/app.xcarchive \
           -exportPath build/ipa \
-          -exportOptionsPlist TrantorApp/ExportOptions.plist \
+          -exportOptionsPlist SaasMobile/ExportOptions.plist \
           -allowProvisioningUpdates \
           | xcbeautify --renderer github-actions
 
@@ -147,7 +147,7 @@ jobs:
         cd saas-mobile/ios
         echo "Show exported IPA..."
         ls **/*.ipa | table -w 200 | print
-        mv build/ipa/TrantorApp.ipa build/ipa/saas-mobile.ipa
+        mv build/ipa/SaasMobile.ipa build/ipa/saas-mobile.ipa
         print 'Rename IPA files:'
         ls -la build/ipa/*.ipa | table -w 200 | print
 
