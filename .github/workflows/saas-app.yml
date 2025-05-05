@@ -222,8 +222,7 @@ jobs:
         print '::endgroup::'
         print 'Build Android App Success:'
         ls **/*.apk | table -w 200 | print
-        mv app/build/outputs/apk/release/app-arm64-v8a-release.apk app/build/outputs/apk/release/saas-mobile-arm64.apk
-        mv app/build/outputs/apk/release/app-armeabi-v7a-release.apk app/build/outputs/apk/release/saas-mobile-armv7a.apk
+        mv app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/saas-mobile-arm64.apk
         print 'Rename APK files:'
         ls app/build/outputs/apk/release/*.apk | table -w 200 | print
 
@@ -243,7 +242,6 @@ jobs:
         const releaseDir = 'saas-mobile/android/app/build/outputs/apk/release'
         const storePath = 'oss://terminus-new-trantor/fe-resources/app-pod'
         ossutil cp --force $'($releaseDir)/saas-mobile-arm64.apk' $'($storePath)/saas-mobile-arm64.($suffix).apk'
-        ossutil cp --force $'($releaseDir)/saas-mobile-armv7a.apk' $'($storePath)/saas-mobile-armv7a.($suffix).apk'
 
     - name: Publish Archive
       uses: softprops/action-gh-release@v2.1.0
@@ -253,7 +251,6 @@ jobs:
         name: "${{ github.event.inputs.gh-version }}"
         files: |
           ./saas-mobile/android/app/build/outputs/apk/release/saas-mobile-arm64.apk
-          ./saas-mobile/android/app/build/outputs/apk/release/saas-mobile-armv7a.apk
         body: "Build from commit ${{ env.BUILD_REF }} at ${{ env.BUILD_DATE }}"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
