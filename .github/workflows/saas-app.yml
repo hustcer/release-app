@@ -180,7 +180,7 @@ jobs:
 
   build-android:
     name: Build Android App
-    runs-on: ubuntu-22.04-arm
+    runs-on: ubuntu-latest
     if: github.event.inputs.android == 'true' || startsWith(github.ref, 'refs/tags/')
     container: reactnativecommunity/react-native-android
     steps:
