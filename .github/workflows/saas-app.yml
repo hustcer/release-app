@@ -5,12 +5,12 @@
 #   2. https://docs.expo.dev/distribution/app-stores/
 #   3. https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/workflow-commands-for-github-actions#grouping-log-lines
 
-name: Build SaaS App
+name: Build GPGJ Apps
 
 on:
   push:
     tags:
-      - 'saas*.*.*'
+      - 'gpgj*.*.*'
     # branches:
     #   - release/app
   workflow_dispatch:
@@ -41,7 +41,7 @@ on:
         description: 'Publish to GitHub'
       gh-version:
         required: true
-        default: 'saas.1.0.0'
+        default: 'gpgj.1.0.0'
         description: 'Github Version'
 
 # Fix Resource not accessible by integration 403 error
@@ -147,7 +147,7 @@ jobs:
         cd saas-mobile/ios
         echo "Show exported IPA..."
         ls **/*.ipa | table -w 200 | print
-        mv build/ipa/SaasMobile.ipa build/ipa/saas-mobile.ipa
+        mv build/ipa/SaasMobile.ipa build/ipa/gpgj.ipa
         print 'Rename IPA files:'
         ls -la build/ipa/*.ipa | table -w 200 | print
 
@@ -165,7 +165,7 @@ jobs:
         let srcBranch = '${{ github.event.inputs.build-branch }}'
         let suffix = $APP_SUFFIX | get -i $srcBranch | default 'None'
         let dest = $'oss://terminus-new-trantor/fe-resources/app-pod/saas-mobile.($suffix).ipa'
-        ossutil cp --force saas-mobile/ios/build/ipa/saas-mobile.ipa $dest
+        ossutil cp --force saas-mobile/ios/build/ipa/gpgj.ipa $dest
 
     - name: Publish Archive
       uses: softprops/action-gh-release@v2.1.0
@@ -173,7 +173,7 @@ jobs:
       with:
         draft: true
         name: "${{ github.event.inputs.gh-version }}"
-        files: './saas-mobile/ios/build/ipa/saas-mobile.ipa'
+        files: './saas-mobile/ios/build/ipa/gpgj.ipa'
         body: "Build from commit ${{ env.BUILD_REF }} at ${{ env.BUILD_DATE }}"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -222,7 +222,7 @@ jobs:
         print '::endgroup::'
         print 'Build Android App Success:'
         ls **/*.apk | table -w 200 | print
-        mv app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/saas-mobile-arm64.apk
+        mv app/build/outputs/apk/release/gpgj_*.apk app/build/outputs/apk/release/gpgj-arm64.apk
         print 'Rename APK files:'
         ls app/build/outputs/apk/release/*.apk | table -w 200 | print
 
@@ -241,7 +241,7 @@ jobs:
         let suffix = $APP_SUFFIX | get -i $srcBranch | default 'None'
         const releaseDir = 'saas-mobile/android/app/build/outputs/apk/release'
         const storePath = 'oss://terminus-new-trantor/fe-resources/app-pod'
-        ossutil cp --force $'($releaseDir)/saas-mobile-arm64.apk' $'($storePath)/saas-mobile-arm64.($suffix).apk'
+        ossutil cp --force $'($releaseDir)/gpgj-arm64.apk' $'($storePath)/gpgj-arm64.($suffix).apk'
 
     - name: Publish Archive
       uses: softprops/action-gh-release@v2.1.0
@@ -250,7 +250,7 @@ jobs:
         draft: true
         name: "${{ github.event.inputs.gh-version }}"
         files: |
-          ./saas-mobile/android/app/build/outputs/apk/release/saas-mobile-arm64.apk
+          ./saas-mobile/android/app/build/outputs/apk/release/gpgj_*.apk
         body: "Build from commit ${{ env.BUILD_REF }} at ${{ env.BUILD_DATE }}"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
