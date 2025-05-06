@@ -164,7 +164,7 @@ jobs:
         let APP_SUFFIX = ${{ vars.SAAS_APP_SUFFIX }}
         let srcBranch = '${{ github.event.inputs.build-branch }}'
         let suffix = $APP_SUFFIX | get -i $srcBranch | default 'None'
-        let dest = $'oss://terminus-new-trantor/fe-resources/app-pod/saas-mobile.($suffix).ipa'
+        let dest = $'oss://terminus-new-trantor/fe-resources/app-pod/gpgj.($suffix).ipa'
         ossutil cp --force saas-mobile/ios/build/ipa/gpgj.ipa $dest
 
     - name: Publish Archive
@@ -250,7 +250,7 @@ jobs:
         draft: true
         name: "${{ github.event.inputs.gh-version }}"
         files: |
-          ./saas-mobile/android/app/build/outputs/apk/release/gpgj_*.apk
+          ./saas-mobile/android/app/build/outputs/apk/release/gpgj-*.apk
         body: "Build from commit ${{ env.BUILD_REF }} at ${{ env.BUILD_DATE }}"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
