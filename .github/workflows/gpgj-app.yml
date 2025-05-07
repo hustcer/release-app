@@ -21,7 +21,7 @@ on:
         default: 'develop'
         description: 'Build Branch'
         options:
-          - main
+          - master
           - develop
           - feature/latest
       android:
