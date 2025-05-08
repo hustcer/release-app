@@ -74,6 +74,36 @@ jobs:
     - name: Show Env Info
       run: npx envinfo
 
+    - name: Cache npm dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          **/node_modules
+          ~/.npm
+        key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-npm-
+
+    - name: Cache CocoaPods
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/Library/Caches/CocoaPods
+          saas-mobile/ios/Pods
+        key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-pods-
+
+    - name: Cache Xcode
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/Library/Developer/Xcode/DerivedData
+          ~/Library/Caches/com.apple.dt.Xcode
+        key: ${{ runner.os }}-xcode-${{ hashFiles('**/Podfile.lock', '**/project.pbxproj') }}
+        restore-keys: |
+          ${{ runner.os }}-xcode-
+
     - name: Install dependencies
       shell: nu {0}
       run: |
