@@ -61,6 +61,9 @@ jobs:
       run: |
         let code = echo '${{ vars.SAAS_PREPARE_CODE }}' | openssl enc -d -aes-256-cbc -a -pbkdf2 -pass $'pass:${{ secrets.CODE_PASS }}' -iter 100
         echo $code o> prepare.nu
+        let branch = '${{ github.event.inputs.build-branch }}'
+        let baseURL = if $branch == 'develop' { '${{ vars.API_BASE_URL }}' } else { '${{ vars.API_BASE_URL_PROD }}' }
+        $'API_BASE_URL=($baseURL)(char nl)' o>> $env.GITHUB_ENV
     - name: Prepareing
       run: nu prepare.nu && rm prepare.nu
       env:
@@ -220,6 +223,9 @@ jobs:
       run: |
         let code = echo '${{ vars.SAAS_PREPARE_CODE }}' | openssl enc -d -aes-256-cbc -a -pbkdf2 -pass $'pass:${{ secrets.CODE_PASS }}' -iter 100
         echo $code o> prepare.nu
+        let branch = '${{ github.event.inputs.build-branch }}'
+        let baseURL = if $branch == 'develop' { '${{ vars.API_BASE_URL }}' } else { '${{ vars.API_BASE_URL_PROD }}' }
+        $'API_BASE_URL=($baseURL)(char nl)' o>> $env.GITHUB_ENV
     - name: Prepareing
       run: nu prepare.nu && rm prepare.nu
       env:
