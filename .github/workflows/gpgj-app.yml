@@ -173,6 +173,8 @@ jobs:
           -exportOptionsPlist SaasMobile/ExportOptions.plist \
           -allowProvisioningUpdates \
           | xcbeautify --renderer github-actions
+      env:
+        API_BASE_URL: ${{ vars.API_BASE_URL }}
 
     - name: Show IPA Info
       shell: nu {0}
@@ -264,6 +266,7 @@ jobs:
     - name: Build Android App
       shell: nu {0}
       run: |
+        print $env.API_BASE_URL
         cd saas-mobile; pwd | print
         npm install --ignore-scripts
         cd android; chmod +x gradlew
@@ -275,6 +278,8 @@ jobs:
         mv app/build/outputs/apk/release/gpgj_*.apk app/build/outputs/apk/release/gpgj-arm64.apk
         print 'Rename APK files:'
         ls app/build/outputs/apk/release/*.apk | table -w 200 | print
+      env:
+        API_BASE_URL: ${{ vars.API_BASE_URL }}
 
     - name: Setup OSS Util
       uses: yizhoumo/setup-ossutil@v2
