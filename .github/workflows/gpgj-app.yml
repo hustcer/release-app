@@ -77,36 +77,6 @@ jobs:
     - name: Show Env Info
       run: npx envinfo
 
-    - name: Cache npm dependencies
-      uses: actions/cache@v4
-      with:
-        path: |
-          **/node_modules
-          ~/.npm
-        key: ${{ runner.os }}-npm-${{ github.event.inputs.build-branch }}-${{ hashFiles('**/package-lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-npm-${{ github.event.inputs.build-branch }}-
-
-    - name: Cache CocoaPods
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/Library/Caches/CocoaPods
-          saas-mobile/ios/Pods
-        key: ${{ runner.os }}-pods-${{ github.event.inputs.build-branch }}-${{ hashFiles('**/Podfile.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-pods-${{ github.event.inputs.build-branch }}-
-
-    - name: Cache Xcode
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/Library/Developer/Xcode/DerivedData
-          ~/Library/Caches/com.apple.dt.Xcode
-        key: ${{ runner.os }}-xcode-${{ github.event.inputs.build-branch }}-${{ hashFiles('**/Podfile.lock', '**/project.pbxproj') }}
-        restore-keys: |
-          ${{ runner.os }}-xcode-${{ github.event.inputs.build-branch }}-
-
     - name: Install dependencies
       shell: nu {0}
       run: |
@@ -238,28 +208,6 @@ jobs:
         node-version: '22'
     - name: Show Env Info
       run: npx envinfo
-
-    - name: Cache npm dependencies
-      uses: actions/cache@v4
-      with:
-        path: |
-          **/node_modules
-          ~/.npm
-        key: ${{ runner.os }}-npm-${{ github.event.inputs.build-branch }}-${{ hashFiles('**/package-lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-npm-${{ github.event.inputs.build-branch }}-
-
-    - name: Cache Gradle
-      uses: actions/cache@v4
-      with:
-        path: |
-          /root/.gradle/caches
-          /root/.gradle/wrapper
-          saas-mobile/android/.gradle
-          saas-mobile/android/app/build
-        key: ${{ runner.os }}-gradle-${{ github.event.inputs.build-branch }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties', '**/build.gradle') }}
-        restore-keys: |
-          ${{ runner.os }}-gradle-${{ github.event.inputs.build-branch }}-
 
     - name: Build Android App
       shell: nu {0}
