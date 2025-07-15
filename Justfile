@@ -23,7 +23,7 @@ set positional-arguments := true
 
 # Used to handle the path separator issue
 JUST_FILE_PATH := justfile()
-NU_DIR := parent_directory(`(which nu).path.0`)
+NU_DIR := parent_directory(`$nu.current-exe`)
 _s := if os_family() == 'windows' { '\' } else { '/' }
 _home_env := if os_family() == 'windows' { 'USERPROFILE' } else { 'HOME' }
 # FIXME: A just bug: invalid directory path by invoking invocation_directory
