@@ -129,8 +129,7 @@ jobs:
           ENABLE_BITCODE=NO \
           ONLY_ACTIVE_ARCH=NO \
           -destination 'generic/platform=iOS' \
-          -allowProvisioningUpdates \
-          | xcbeautify --renderer github-actions
+          -allowProvisioningUpdates
 
         # Export IPA
         # "ad-hoc" is deprecated at Xcode 15.4. Use "release-testing" instead.
@@ -139,8 +138,7 @@ jobs:
           -archivePath build/app.xcarchive \
           -exportPath build/ipa \
           -exportOptionsPlist TrantorApp/ExportOptions.plist \
-          -allowProvisioningUpdates \
-          | xcbeautify --renderer github-actions
+          -allowProvisioningUpdates
 
     - name: Show IPA Info
       shell: nu {0}
