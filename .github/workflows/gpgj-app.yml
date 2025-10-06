@@ -166,7 +166,7 @@ jobs:
       run: |
         let APP_SUFFIX = ${{ vars.SAAS_APP_SUFFIX }}
         let srcBranch = '${{ github.event.inputs.build-branch }}'
-        let suffix = $APP_SUFFIX | get -i $srcBranch | default 'None'
+        let suffix = $APP_SUFFIX | get -o $srcBranch | default 'None'
         let dest = $'oss://terminus-new-trantor/fe-resources/app-pod/gpgj.($suffix).ipa'
         ossutil cp --force saas-mobile/ios/build/ipa/gpgj.ipa $dest
 
@@ -237,7 +237,7 @@ jobs:
       run: |
         let APP_SUFFIX = ${{ vars.SAAS_APP_SUFFIX }}
         let srcBranch = '${{ github.event.inputs.build-branch }}'
-        let suffix = $APP_SUFFIX | get -i $srcBranch | default 'None'
+        let suffix = $APP_SUFFIX | get -o $srcBranch | default 'None'
         const releaseDir = 'saas-mobile/android/app/build/outputs/apk/release'
         const storePath = 'oss://terminus-new-trantor/fe-resources/app-pod'
         ossutil cp --force $'($releaseDir)/gpgj-arm64.apk' $'($storePath)/gpgj-arm64.($suffix).apk'

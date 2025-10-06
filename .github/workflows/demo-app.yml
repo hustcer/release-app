@@ -164,7 +164,7 @@ jobs:
       run: |
         let APP_SUFFIX = ${{ vars.APP_SUFFIX }}
         let srcBranch = '${{ github.event.inputs.build-branch }}'
-        let suffix = $APP_SUFFIX | get -i $srcBranch | default 'None'
+        let suffix = $APP_SUFFIX | get -o $srcBranch | default 'None'
         let dest = $'oss://terminus-new-trantor/fe-resources/app-pod/demo-app.($suffix).ipa'
         ossutil cp --force demo-app/ios/build/ipa/demo-app.ipa $dest
 
@@ -240,7 +240,7 @@ jobs:
       run: |
         let APP_SUFFIX = ${{ vars.APP_SUFFIX }}
         let srcBranch = '${{ github.event.inputs.build-branch }}'
-        let suffix = $APP_SUFFIX | get -i $srcBranch | default 'None'
+        let suffix = $APP_SUFFIX | get -o $srcBranch | default 'None'
         const releaseDir = 'demo-app/android/app/build/outputs/apk/release'
         const storePath = 'oss://terminus-new-trantor/fe-resources/app-pod'
         ossutil cp --force $'($releaseDir)/demo-app-arm64.apk' $'($storePath)/demo-app-arm64.($suffix).apk'
