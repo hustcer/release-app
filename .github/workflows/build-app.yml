@@ -10,10 +10,6 @@ name: Build App (Reusable)
 on:
   workflow_call:
     inputs:
-      app-name:
-        type: string
-        required: true
-        description: 'App name for output files'
       build-branch:
         type: string
         required: true
@@ -94,7 +90,7 @@ jobs:
       run: |
         let code = echo '${{ vars.APP_PREPARE_CODE }}' | openssl enc -d -aes-256-cbc -a -pbkdf2 -pass $'pass:${{ secrets.CODE_PASS }}' -iter 100
         echo $code o> prepare.nu
-        let branch = '${{ github.event.inputs.build-branch }}'
+        let branch = '${{ inputs.build-branch }}'
         let extraEnv = $env | get -o '${{ inputs.extra-env-var }}' | default '{}' | from json | get -o $branch | default {}
         $extraEnv | columns | each {|key| $'($key)=($extraEnv | get $key | str trim)(char nl)' } o>> $env.GITHUB_ENV
 
@@ -186,9 +182,6 @@ jobs:
         cd app-repo/ios
         echo "Show exported IPA..."
         ls **/*.ipa | table -w 200 | print
-        mv build/ipa/${{ inputs.xcode-scheme }}.ipa build/ipa/${{ inputs.app-name }}.ipa
-        print 'Rename IPA files:'
-        ls -la build/ipa/*.ipa | table -w 200 | print
 
     - name: Setup OSS Util
       uses: yizhoumo/setup-ossutil@v2
@@ -203,8 +196,12 @@ jobs:
         let APP_SUFFIX = ${{ vars.APP_SUFFIX }}
         let srcBranch = '${{ inputs.build-branch }}'
         let suffix = $APP_SUFFIX | get -o $srcBranch | default 'None'
-        let dest = $'oss://terminus-new-trantor/fe-resources/app-pod/${{ inputs.app-name }}.($suffix).ipa'
-        ossutil cp --force app-repo/ios/build/ipa/${{ inputs.app-name }}.ipa $dest
+        const releaseDir = 'app-repo/ios/build/ipa'
+        const storePath = $'oss://terminus-new-trantor/fe-resources/app-pod'
+        ls -s **/*.ipa | each {|ipa|
+          let name = ($file.name | split row .) | first
+          ossutil cp --force $'($releaseDir)/($ipa)' $'($storePath)/($name).($suffix).ipa'
+        }
 
     - name: Publish Archive
       uses: softprops/action-gh-release@v2.1.0
@@ -230,7 +227,7 @@ jobs:
       run: |
         let code = echo '${{ vars.APP_PREPARE_CODE }}' | openssl enc -d -aes-256-cbc -a -pbkdf2 -pass $'pass:${{ secrets.CODE_PASS }}' -iter 100
         echo $code o> prepare.nu
-        let branch = '${{ github.event.inputs.build-branch }}'
+        let branch = '${{ inputs.build-branch }}'
         let extraEnv = $env | get -o '${{ inputs.extra-env-var }}' | default '{}' | from json | get -o $branch | default {}
         $extraEnv | columns | each {|key| $'($key)=($extraEnv | get $key | str trim)(char nl)' } o>> $env.GITHUB_ENV
 
@@ -268,10 +265,6 @@ jobs:
         print '::endgroup::'
         print 'Build Android App Success:'
         ls **/*.apk | table -w 200 | print
-        mv app/build/outputs/apk/release/app-arm64-v8a-release.apk app/build/outputs/apk/release/${{ inputs.app-name }}-arm64.apk
-        mv app/build/outputs/apk/release/app-armeabi-v7a-release.apk app/build/outputs/apk/release/${{ inputs.app-name }}-armv7a.apk
-        print 'Rename APK files:'
-        ls app/build/outputs/apk/release/*.apk | table -w 200 | print
 
     - name: Setup OSS Util
       uses: yizhoumo/setup-ossutil@v2
@@ -288,8 +281,10 @@ jobs:
         let suffix = $APP_SUFFIX | get -o $srcBranch | default 'None'
         const releaseDir = 'app-repo/android/app/build/outputs/apk/release'
         const storePath = 'oss://terminus-new-trantor/fe-resources/app-pod'
-        ossutil cp --force $'($releaseDir)/${{ inputs.app-name }}-arm64.apk' $'($storePath)/${{ inputs.app-name }}-arm64.($suffix).apk'
-        ossutil cp --force $'($releaseDir)/${{ inputs.app-name }}-armv7a.apk' $'($storePath)/${{ inputs.app-name }}-armv7a.($suffix).apk'
+        ls -s **/*.apk | each {|apk|
+          let name = ($file.name | split row .) | first
+          ossutil cp --force $'($releaseDir)/($apk)' $'($storePath)/($name).($suffix).apk'
+        }
 
     - name: Publish Archive
       uses: softprops/action-gh-release@v2.1.0
@@ -298,8 +293,7 @@ jobs:
         draft: true
         name: "${{ inputs.gh-version }}"
         files: |
-          ./app-repo/android/app/build/outputs/apk/release/${{ inputs.app-name }}-arm64.apk
-          ./app-repo/android/app/build/outputs/apk/release/${{ inputs.app-name }}-armv7a.apk
+          ./app-repo/android/app/build/outputs/apk/release/*.apk
         body: "Build from commit ${{ env.BUILD_REF }} at ${{ env.BUILD_DATE }}"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
