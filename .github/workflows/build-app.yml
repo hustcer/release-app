@@ -42,6 +42,12 @@ on:
         type: string
         required: true
         description: 'Name of the repository URL variable (e.g., DEMO_REPO_URL)'
+      extra-env-var:
+        type: string
+        required: false
+        default: 'NOT_SET'
+        # EXTRA_ENV: { "develop": { "API_BASE_URL": "URL_1" }, "master": { "API_BASE_URL": "URL_2" } }
+        description: 'Key of extra environment variables, the value is a JSON string of environment variables'
       xcode-scheme:
         type: string
         required: false
@@ -88,6 +94,9 @@ jobs:
       run: |
         let code = echo '${{ vars.APP_PREPARE_CODE }}' | openssl enc -d -aes-256-cbc -a -pbkdf2 -pass $'pass:${{ secrets.CODE_PASS }}' -iter 100
         echo $code o> prepare.nu
+        let branch = '${{ github.event.inputs.build-branch }}'
+        let extraEnv = $env | get -o '${{ inputs.extra-env-var }}' | default '{}' | from json | get -o $branch | default {}
+        $extraEnv | columns | each {|key| $'($key)=($extraEnv | get $key | str trim)(char nl)' } o>> $env.GITHUB_ENV
 
     - name: Prepareing
       run: nu prepare.nu && rm prepare.nu
@@ -221,6 +230,9 @@ jobs:
       run: |
         let code = echo '${{ vars.APP_PREPARE_CODE }}' | openssl enc -d -aes-256-cbc -a -pbkdf2 -pass $'pass:${{ secrets.CODE_PASS }}' -iter 100
         echo $code o> prepare.nu
+        let branch = '${{ github.event.inputs.build-branch }}'
+        let extraEnv = $env | get -o '${{ inputs.extra-env-var }}' | default '{}' | from json | get -o $branch | default {}
+        $extraEnv | columns | each {|key| $'($key)=($extraEnv | get $key | str trim)(char nl)' } o>> $env.GITHUB_ENV
 
     - name: Prepareing
       run: nu prepare.nu && rm prepare.nu

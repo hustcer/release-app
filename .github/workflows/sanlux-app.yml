@@ -54,6 +54,7 @@ jobs:
     with:
       xcode-scheme: 'SanluxPda'
       repo-url-var: SANLUX_REPO_URL
+      extra-env-var: SANLUX_EXTRA_ENV
       app-name: ${{ github.event.inputs.app-name }}
       ios: ${{ github.event.inputs.ios == 'true' }}
       android: ${{ github.event.inputs.android == 'true' }}
