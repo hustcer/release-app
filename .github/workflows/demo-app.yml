@@ -59,9 +59,12 @@ jobs:
       build-branch: ${{ github.event.inputs.build-branch }}
       gh-version: ${{ github.event.inputs.gh-version }}
       publish-to-gh: ${{ github.event.inputs.publish-to-gh == 'true' }}
+    # secrets: inherit  # 🎯 继承所有 secrets，这种方式更简洁但可能不安全
     secrets:
       OSS_AK: ${{ secrets.OSS_AK }}
       OSS_SK: ${{ secrets.OSS_SK }}
+      # 在 reusable workflow 中，secrets 不会自动继承，必须显式传递
+      CODE_PASS: ${{ secrets.CODE_PASS }}
       ERDA_GIT_TOKEN: ${{ secrets.ERDA_GIT_TOKEN }}
       KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
       IOS_DISTRIBUTION_CERTIFICATE_PASSWORD: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE_PASSWORD }}

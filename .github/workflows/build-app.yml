@@ -43,6 +43,8 @@ on:
         required: true
         description: 'Name of the repository URL variable (e.g., DEMO_REPO_URL)'
     secrets:
+      CODE_PASS:
+        required: true
       ERDA_GIT_TOKEN:
         required: true
       OSS_AK:
