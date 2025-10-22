@@ -1,17 +1,17 @@
 # Description:
-#   - A github workflow for building and uploading the DEMO app (apk and ipa)
+#   - A github workflow for building and uploading the Sanlux app (apk and ipa)
 #   - This workflow calls the reusable build-app.yml workflow
 # REF:
 #   1. https://docs.github.com/en/actions/using-workflows/reusing-workflows
 
-name: Build DEMO Apps
+name: Build Sanlux Apps
 
 on:
   workflow_dispatch:
     inputs:
       app-name:
         required: true
-        default: 'demo-app'
+        default: 'sanlux-app'
         description: 'App Name'
       build-branch:
         type: choice
@@ -21,6 +21,7 @@ on:
         options:
           - develop
           - master
+          - release/latest
       android:
         type: boolean
         default: false
@@ -48,10 +49,10 @@ permissions:
 
 jobs:
   build:
-    name: Build DEMO App
+    name: Build Sanlux App
     uses: ./.github/workflows/build-app.yml
     with:
-      repo-url-var: DEMO_REPO_URL
+      repo-url-var: SANLUX_REPO_URL
       app-name: ${{ github.event.inputs.app-name }}
       ios: ${{ github.event.inputs.ios == 'true' }}
       android: ${{ github.event.inputs.android == 'true' }}
