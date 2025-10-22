@@ -52,6 +52,7 @@ jobs:
     name: Build Sanlux App
     uses: ./.github/workflows/build-app.yml
     with:
+      xcode-scheme: 'SanluxPda'
       repo-url-var: SANLUX_REPO_URL
       app-name: ${{ github.event.inputs.app-name }}
       ios: ${{ github.event.inputs.ios == 'true' }}

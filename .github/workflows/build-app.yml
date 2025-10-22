@@ -42,6 +42,21 @@ on:
         type: string
         required: true
         description: 'Name of the repository URL variable (e.g., DEMO_REPO_URL)'
+      xcode-scheme:
+        type: string
+        required: false
+        default: 'TrantorApp'
+        description: 'Xcode scheme name for building iOS app'
+      bundle-identifier:
+        type: string
+        required: false
+        default: 'io.terminus.terp.app'
+        description: 'iOS app bundle identifier'
+      provisioning-profile:
+        type: string
+        required: false
+        default: 'terp-adhoc'
+        description: 'Provisioning profile specifier'
     secrets:
       CODE_PASS:
         required: true
@@ -131,11 +146,11 @@ jobs:
         # Disable automatic signing and device check
         defaults write com.apple.dt.Xcode IDESkipMacroValidation -bool YES
 
-        set -o pipefail && xcodebuild -workspace *.xcworkspace -scheme "TrantorApp" \
+        set -o pipefail && xcodebuild -workspace *.xcworkspace -scheme "${{ inputs.xcode-scheme }}" \
           -configuration Release \
           DEVELOPMENT_TEAM="QNWSSM6MTS" \
-          PROVISIONING_PROFILE_SPECIFIER="terp-adhoc" \
-          PRODUCT_BUNDLE_IDENTIFIER="io.terminus.terp.app" \
+          PROVISIONING_PROFILE_SPECIFIER="${{ inputs.provisioning-profile }}" \
+          PRODUCT_BUNDLE_IDENTIFIER="${{ inputs.bundle-identifier }}" \
           -archivePath build/app.xcarchive \
           archive \
           CODE_SIGN_STYLE="Manual" \
@@ -152,7 +167,7 @@ jobs:
         set -o pipefail && xcodebuild -exportArchive \
           -archivePath build/app.xcarchive \
           -exportPath build/ipa \
-          -exportOptionsPlist TrantorApp/ExportOptions.plist \
+          -exportOptionsPlist ${{ inputs.xcode-scheme }}/ExportOptions.plist \
           -allowProvisioningUpdates \
           | xcbeautify --renderer github-actions
 
@@ -162,7 +177,7 @@ jobs:
         cd app-repo/ios
         echo "Show exported IPA..."
         ls **/*.ipa | table -w 200 | print
-        mv build/ipa/TrantorApp.ipa build/ipa/${{ inputs.app-name }}.ipa
+        mv build/ipa/${{ inputs.xcode-scheme }}.ipa build/ipa/${{ inputs.app-name }}.ipa
         print 'Rename IPA files:'
         ls -la build/ipa/*.ipa | table -w 200 | print
 
