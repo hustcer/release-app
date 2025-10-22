@@ -63,8 +63,6 @@ on:
         required: true
       IOS_AD_HOC_PROVISIONING_PROFILE_BASE64:
         required: true
-      GITHUB_TOKEN:
-        required: true
 
 jobs:
   build-ios:
