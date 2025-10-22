@@ -184,7 +184,7 @@ jobs:
     - name: Show IPA Info
       shell: nu {0}
       run: |
-        use ${{ github.workspace }}/nu/common.nu *
+        source ${{ github.workspace }}/nu/common.nu
 
         let APP_SUFFIX = ${{ vars.APP_SUFFIX }}
         let srcBranch = '${{ inputs.build-branch }}'
@@ -193,13 +193,13 @@ jobs:
         cd app-repo/ios
         echo "Show exported IPA..."
         ls **/*.ipa | table -w 200 | print
-        let prefix = get-prefix (ls -s **/*.ipa | get name)
+        let prefix = get-prefix (ls -s **/*.ipa | get name) | str replace .ipa ''
         ls **/*.ipa | each {|file|
-          let name = $file.name | str replace $prefix $appName | str replace .ipa $'($suffix).ipa'
+          let name = $file.name | str replace $prefix $appName | str replace .ipa $'.($suffix).ipa'
           mv $file.name $name
         }
         print 'Renamed IPA files:'
-        ls -la **/*.ipa | table -w 200 | print
+        ls **/*.ipa | table -w 200 | print
 
     - name: Setup OSS Util
       uses: yizhoumo/setup-ossutil@v2
@@ -272,7 +272,7 @@ jobs:
     - name: Build Android App
       shell: nu {0}
       run: |
-        use ${{ github.workspace }}/nu/common.nu *
+        source /__w/release-app/release-app/nu/common.nu
 
         let APP_SUFFIX = ${{ vars.APP_SUFFIX }}
         let srcBranch = '${{ inputs.build-branch }}'
@@ -285,14 +285,15 @@ jobs:
         ./gradlew assembleRelease
         print '::endgroup::'
         print 'Build Android App Success:'
-        ls **/*.apk | table -w 200 | print
-        let prefix = get-prefix (ls -s **/*.apk | get name)
-        ls **/*.apk | each {|file|
-          let name = $file.name | str replace $prefix $appName | str replace .apk $'($suffix).apk'
+        cd app/build/outputs/apk/release
+        ls *.apk | table -w 200 | print
+        let prefix = get-prefix (ls -s *.apk | get name) | str replace .apk '' | split row - | first
+        ls *.apk | each {|file|
+          let name = $file.name | str replace $prefix $appName | str replace .apk $'.($suffix).apk'
           mv $file.name $name
         }
         print 'Renamed APK files:'
-        ls -la **/*.apk | table -w 200 | print
+        ls *.apk | table -w 200 | print
 
     - name: Setup OSS Util
       uses: yizhoumo/setup-ossutil@v2
@@ -306,8 +307,9 @@ jobs:
       run: |
         const releaseDir = 'app-repo/android/app/build/outputs/apk/release'
         const storePath = 'oss://terminus-new-trantor/fe-resources/app-pod'
-        ls **/*.apk | each {|file|
-          ossutil cp --force $'($releaseDir)/($file.name)' $'($storePath)/($file.name)'
+        cd $releaseDir
+        ls -s *.apk | each {|file|
+          ossutil cp --force $file.name $'($storePath)/($file.name)'
         }
 
     - name: Publish Archive
