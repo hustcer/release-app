@@ -87,6 +87,7 @@ jobs:
     runs-on: macos-latest
     if: inputs.ios == true || startsWith(github.ref, 'refs/tags/')
     steps:
+    - uses: actions/checkout@v5
     - uses: hustcer/setup-nu@v3
 
     - name: Prepare code
@@ -183,9 +184,21 @@ jobs:
     - name: Show IPA Info
       shell: nu {0}
       run: |
+        source nu/common.nu
+        let APP_SUFFIX = ${{ vars.APP_SUFFIX }}
+        let srcBranch = '${{ inputs.build-branch }}'
+        let suffix = $APP_SUFFIX | get -o $srcBranch | default 'None'
+        const appId = '${{ inputs.app-id }}'
         cd app-repo/ios
         echo "Show exported IPA..."
         ls **/*.ipa | table -w 200 | print
+        let prefix = get-prefix (ls -s **/*.ipa | get name)
+        ls **/*.ipa | each {|file|
+          let name = $file.name | str replace $prefix $appId | str replace .ipa $'($suffix).ipa'
+          mv $file.name $name
+        }
+        print 'Renamed IPA files:'
+        ls -la **/*.ipa | table -w 200 | print
 
     - name: Setup OSS Util
       uses: yizhoumo/setup-ossutil@v2
@@ -197,15 +210,10 @@ jobs:
     - name: Upload IPA to OSS
       shell: nu {0}
       run: |
-        let APP_SUFFIX = ${{ vars.APP_SUFFIX }}
-        let srcBranch = '${{ inputs.build-branch }}'
-        let suffix = $APP_SUFFIX | get -o $srcBranch | default 'None'
-        const appId = '${{ inputs.app-id }}'
         const releaseDir = 'app-repo/ios/build/ipa'
         const storePath = $'oss://terminus-new-trantor/fe-resources/app-pod'
-        ls -s **/*.ipa | each {|ipa|
-          let name = ($ipa.name | split row .) | first
-          ossutil cp --force $'($releaseDir)/($ipa.name)' $'($storePath)/($name)-($appId).($suffix).ipa'
+        ls -s **/*.ipa | each {|file|
+          ossutil cp --force $'($releaseDir)/($file.name)' $'($storePath)/($file.name)'
         }
 
     - name: Publish Archive
@@ -225,6 +233,7 @@ jobs:
     if: inputs.android == true || startsWith(github.ref, 'refs/tags/')
     container: reactnativecommunity/react-native-android
     steps:
+    - uses: actions/checkout@v5
     - uses: hustcer/setup-nu@v3
 
     - name: Prepare code
@@ -262,6 +271,11 @@ jobs:
     - name: Build Android App
       shell: nu {0}
       run: |
+        source nu/common.nu
+        let APP_SUFFIX = ${{ vars.APP_SUFFIX }}
+        let srcBranch = '${{ inputs.build-branch }}'
+        let suffix = $APP_SUFFIX | get -o $srcBranch | default 'None'
+        const appId = '${{ inputs.app-id }}'
         cd app-repo; pwd | print
         npm install --ignore-scripts
         cd android; chmod +x gradlew
@@ -270,6 +284,13 @@ jobs:
         print '::endgroup::'
         print 'Build Android App Success:'
         ls **/*.apk | table -w 200 | print
+        let prefix = get-prefix (ls -s **/*.apk | get name)
+        ls **/*.apk | each {|file|
+          let name = $file.name | str replace $prefix $appId | str replace .apk $'($suffix).apk'
+          mv $file.name $name
+        }
+        print 'Renamed APK files:'
+        ls -la **/*.apk | table -w 200 | print
 
     - name: Setup OSS Util
       uses: yizhoumo/setup-ossutil@v2
@@ -281,15 +302,10 @@ jobs:
     - name: Upload APK to OSS
       shell: nu {0}
       run: |
-        let APP_SUFFIX = ${{ vars.APP_SUFFIX }}
-        let srcBranch = '${{ inputs.build-branch }}'
-        let suffix = $APP_SUFFIX | get -o $srcBranch | default 'None'
-        const appId = '${{ inputs.app-id }}'
         const releaseDir = 'app-repo/android/app/build/outputs/apk/release'
         const storePath = 'oss://terminus-new-trantor/fe-resources/app-pod'
-        ls -s **/*.apk | each {|apk|
-          let name = ($apk.name | split row .) | first
-          ossutil cp --force $'($releaseDir)/($apk.name)' $'($storePath)/($name)-($appId).($suffix).apk'
+        ls **/*.apk | each {|file|
+          ossutil cp --force $'($releaseDir)/($file.name)' $'($storePath)/($file.name)'
         }
 
     - name: Publish Archive
