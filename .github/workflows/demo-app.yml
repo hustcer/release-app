@@ -53,7 +53,6 @@ jobs:
     uses: ./.github/workflows/build-app.yml
     with:
       repo-url-var: DEMO_REPO_URL
-      prepare-code-var: APP_PREPARE_CODE
       app-name: ${{ github.event.inputs.app-name }}
       ios: ${{ github.event.inputs.ios == 'true' }}
       android: ${{ github.event.inputs.android == 'true' }}
@@ -61,7 +60,6 @@ jobs:
       gh-version: ${{ github.event.inputs.gh-version }}
       publish-to-gh: ${{ github.event.inputs.publish-to-gh == 'true' }}
     secrets:
-      CODE_PASS: ${{ secrets.CODE_PASS }}
       OSS_AK: ${{ secrets.OSS_AK }}
       OSS_SK: ${{ secrets.OSS_SK }}
       ERDA_GIT_TOKEN: ${{ secrets.ERDA_GIT_TOKEN }}
