@@ -10,10 +10,10 @@ name: Build App (Reusable)
 on:
   workflow_call:
     inputs:
-      app-id:
+      app-name:
         type: string
         required: true
-        description: 'A unique app ID for output files while uploading to OSS'
+        description: 'A unique app name for output files'
       build-branch:
         type: string
         required: true
@@ -184,17 +184,18 @@ jobs:
     - name: Show IPA Info
       shell: nu {0}
       run: |
-        source nu/common.nu
+        use ${{ github.workspace }}/nu/common.nu *
+
         let APP_SUFFIX = ${{ vars.APP_SUFFIX }}
         let srcBranch = '${{ inputs.build-branch }}'
         let suffix = $APP_SUFFIX | get -o $srcBranch | default 'None'
-        const appId = '${{ inputs.app-id }}'
+        const appName = '${{ inputs.app-name }}'
         cd app-repo/ios
         echo "Show exported IPA..."
         ls **/*.ipa | table -w 200 | print
         let prefix = get-prefix (ls -s **/*.ipa | get name)
         ls **/*.ipa | each {|file|
-          let name = $file.name | str replace $prefix $appId | str replace .ipa $'($suffix).ipa'
+          let name = $file.name | str replace $prefix $appName | str replace .ipa $'($suffix).ipa'
           mv $file.name $name
         }
         print 'Renamed IPA files:'
@@ -271,11 +272,12 @@ jobs:
     - name: Build Android App
       shell: nu {0}
       run: |
-        source nu/common.nu
+        use ${{ github.workspace }}/nu/common.nu *
+
         let APP_SUFFIX = ${{ vars.APP_SUFFIX }}
         let srcBranch = '${{ inputs.build-branch }}'
         let suffix = $APP_SUFFIX | get -o $srcBranch | default 'None'
-        const appId = '${{ inputs.app-id }}'
+        const appName = '${{ inputs.app-name }}'
         cd app-repo; pwd | print
         npm install --ignore-scripts
         cd android; chmod +x gradlew
@@ -286,7 +288,7 @@ jobs:
         ls **/*.apk | table -w 200 | print
         let prefix = get-prefix (ls -s **/*.apk | get name)
         ls **/*.apk | each {|file|
-          let name = $file.name | str replace $prefix $appId | str replace .apk $'($suffix).apk'
+          let name = $file.name | str replace $prefix $appName | str replace .apk $'($suffix).apk'
           mv $file.name $name
         }
         print 'Renamed APK files:'

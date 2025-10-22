@@ -47,7 +47,7 @@ jobs:
     name: Build DEMO App
     uses: ./.github/workflows/build-app.yml
     with:
-      app-id: 'demo'
+      app-name: 'demo-app'
       repo-url-var: DEMO_REPO_URL
       ios: ${{ github.event.inputs.ios == 'true' }}
       android: ${{ github.event.inputs.android == 'true' }}
