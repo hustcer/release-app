@@ -10,6 +10,10 @@ name: Build App (Reusable)
 on:
   workflow_call:
     inputs:
+      app-id:
+        type: string
+        required: true
+        description: 'A unique app ID for output files while uploading to OSS'
       build-branch:
         type: string
         required: true
@@ -196,11 +200,12 @@ jobs:
         let APP_SUFFIX = ${{ vars.APP_SUFFIX }}
         let srcBranch = '${{ inputs.build-branch }}'
         let suffix = $APP_SUFFIX | get -o $srcBranch | default 'None'
+        const appId = '${{ inputs.app-id }}'
         const releaseDir = 'app-repo/ios/build/ipa'
         const storePath = $'oss://terminus-new-trantor/fe-resources/app-pod'
         ls -s **/*.ipa | each {|ipa|
-          let name = ($file.name | split row .) | first
-          ossutil cp --force $'($releaseDir)/($ipa)' $'($storePath)/($name).($suffix).ipa'
+          let name = ($ipa.name | split row .) | first
+          ossutil cp --force $'($releaseDir)/($ipa.name)' $'($storePath)/($name)-($appId).($suffix).ipa'
         }
 
     - name: Publish Archive
@@ -279,11 +284,12 @@ jobs:
         let APP_SUFFIX = ${{ vars.APP_SUFFIX }}
         let srcBranch = '${{ inputs.build-branch }}'
         let suffix = $APP_SUFFIX | get -o $srcBranch | default 'None'
+        const appId = '${{ inputs.app-id }}'
         const releaseDir = 'app-repo/android/app/build/outputs/apk/release'
         const storePath = 'oss://terminus-new-trantor/fe-resources/app-pod'
         ls -s **/*.apk | each {|apk|
-          let name = ($file.name | split row .) | first
-          ossutil cp --force $'($releaseDir)/($apk)' $'($storePath)/($name).($suffix).apk'
+          let name = ($apk.name | split row .) | first
+          ossutil cp --force $'($releaseDir)/($apk.name)' $'($storePath)/($name)-($appId).($suffix).apk'
         }
 
     - name: Publish Archive

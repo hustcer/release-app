@@ -9,10 +9,6 @@ name: Build DEMO Apps
 on:
   workflow_dispatch:
     inputs:
-      app-name:
-        required: true
-        default: 'demo-app'
-        description: 'App Name'
       build-branch:
         type: choice
         required: true
@@ -51,8 +47,8 @@ jobs:
     name: Build DEMO App
     uses: ./.github/workflows/build-app.yml
     with:
+      app-id: 'demo'
       repo-url-var: DEMO_REPO_URL
-      app-name: ${{ github.event.inputs.app-name }}
       ios: ${{ github.event.inputs.ios == 'true' }}
       android: ${{ github.event.inputs.android == 'true' }}
       build-branch: ${{ github.event.inputs.build-branch }}
