@@ -12,12 +12,12 @@ on:
       build-branch:
         type: choice
         required: true
-        default: 'develop'
+        default: 'release/latest'
         description: 'Build Branch'
         options:
-          - develop
-          - master
+          - main
           - release/latest
+          - develop
       android:
         type: boolean
         default: false
