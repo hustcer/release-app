@@ -1,0 +1,17 @@
+name: Trigger Demo App Build
+
+on:
+  workflow_dispatch:
+
+jobs:
+  trigger-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Demo App Build
+        uses: hustcer/terp-app/.github/workflows/demo-app.yml@release/app
+        with:
+          build-branch: 'master'
+          android: true
+          ios: false
+          publish-to-gh: false
+          gh-version: 'v1.1.0'
