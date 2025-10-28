@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Trigger Demo App Build
-        uses: hustcer/terp-app/.github/workflows/demo-app.yml@release/app
+        uses: hustcer/terp-app/.github/workflows/demo-app.yml@master
         with:
           build-branch: 'master'
           android: true
