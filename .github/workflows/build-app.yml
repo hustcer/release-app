@@ -87,7 +87,7 @@ jobs:
     runs-on: macos-latest
     if: inputs.ios == true || startsWith(github.ref, 'refs/tags/')
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
     - uses: hustcer/setup-nu@v3
 
     - name: Prepare code
@@ -241,7 +241,7 @@ jobs:
         }
 
     - name: Publish Archive
-      uses: softprops/action-gh-release@v2.4.1
+      uses: softprops/action-gh-release@v2.5.0
       if: inputs.publish-to-gh == true
       with:
         draft: true
@@ -257,7 +257,7 @@ jobs:
     if: inputs.android == true || startsWith(github.ref, 'refs/tags/')
     container: reactnativecommunity/react-native-android
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
     - uses: hustcer/setup-nu@v3
 
     - name: Prepare code
@@ -351,7 +351,7 @@ jobs:
         }
 
     - name: Publish Archive
-      uses: softprops/action-gh-release@v2.4.1
+      uses: softprops/action-gh-release@v2.5.0
       if: inputs.publish-to-gh == true
       with:
         draft: true
